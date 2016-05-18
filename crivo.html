@@ -1,0 +1,208 @@
+<html>
+    <head>
+        <!-- Acadêmico: Angelo K. Cavallet -->
+        <title>Crivo de Eratóstenes</title>
+        <style type="text/css">
+            td{
+                padding: 8px;
+                text-align: center;
+            }
+
+            .normal{
+                background-color: lightgray;
+            }
+            
+            .excluido{
+                background-color: red;
+            }
+            
+            .primo{
+                background-color: greenyellow;
+            }
+        </style>
+        
+        <script type="text/javascript">
+            var numeros;
+            
+            //Função criada para validar o valor de x e apos validar iniciar o crivo
+            function validaCrivo(){
+                var x = document.getElementById('valorX').value;
+                document.getElementById('msgErro').innerHTML = '';
+                document.getElementById('msgInfo').innerHTML = 'carregando...';
+                if(parseInt(x)){
+                    x = parseInt(x);
+                    if(x <= 100000){
+                        if(x > 1){
+                            iniciaValores(x);
+                            calculaCrivo();
+                            escrevePrimos();
+                        }else{
+                            document.getElementById('msgInfo').innerHTML = '';
+                            document.getElementById('msgErro').innerHTML = 'Erro, x deve ser maior que 1.';
+                        }
+                    }else{
+                        document.getElementById('msgInfo').innerHTML = '';
+                        document.getElementById('msgErro').innerHTML = 'Erro, x é muito grande.';
+                    }
+
+                }else{
+                    document.getElementById('msgInfo').innerHTML = '';
+                    document.getElementById('msgErro').innerHTML = 'Erro, x deve ser um número inteiro.';
+                }
+
+                
+            }
+            
+            //Função que inicia o Array de objetos que irá armazenar os valores
+            // e escreve os valores em uma tabela de 1 ate x
+            function iniciaValores(x){
+                numeros = Array();
+                var valor = 1;
+                var numColunas = 4
+                var numLinhas = Math.ceil(x/numColunas);
+                
+                var tabela = document.getElementById('tabelaNumeros');
+                tabela.innerHTML = '';
+                    
+                while(numLinhas > 0){
+                    var linha = document.createElement('tr');
+                    
+                    for(var i=0; i<=numColunas; i++){
+                        if(valor <= x){
+                            var celula = document.createElement('td');
+                            celula.innerHTML = valor;
+                            celula.className = 'normal';
+
+                            numeros[valor] = {
+                                element:    celula,
+                                verificado: false,
+                                primo:      false,
+                                valor:      valor
+                            }
+
+                            valor++;                        
+                            linha.appendChild(celula);
+                        }else{
+                            break;
+                        }
+                    }
+                    tabela.appendChild(linha);     
+                    
+                    numLinhas--;
+                }             
+            }
+            
+            // Função principal que calcula o crivo de Eratóstenes e marca
+            // os numeros excluidos e os numeros primos nas tabelas
+            function calculaCrivo(){
+                var valMaxChecar = Math.floor(Math.sqrt(numeros.length - 1));
+                
+                numeros[1].verificado = true;
+                numeros[1].primo = false;
+                numeros[1].element.className = 'excluido';
+                
+                for(var i=2; i<=valMaxChecar; i++){
+                    if(numeros[i].verificado == false){
+                        if(validaNumeroPrimo(numeros[i].valor)){
+                            numeros[i].verificado = true;
+                            numeros[i].primo = true;
+                            numeros[i].element.className = 'primo';
+                            eliminaMultiplos(i);
+                        }else{
+                            numeros[i].verificado = true;
+                            numeros[i].primo = false;
+                            numeros[i].element.className = 'excluido';
+                        }
+                    }
+                }
+                
+                for(var i in numeros){
+                    if(numeros[i].verificado == false){
+                        numeros[i].primo = true;
+                        numeros[i].element.className = 'primo';
+                    }
+                }
+            }
+            
+            // Verifica se um numero é primo dividindo por 1 ate ele mesmo
+            function validaNumeroPrimo(num){
+                var divisivel = 0;
+                
+                for(var i=1; i<=num; i++){
+                    if(num%i == 0){
+                        divisivel++;
+                    }
+                }
+                if(divisivel > 2){
+                    return false;
+                }else{
+                    return true;
+                }
+                
+            }
+            
+            // Funcao que elimina da tabela os multiplos de um numero primo
+            function eliminaMultiplos(i){
+                var mult = i + i;
+                while(mult < numeros.length){
+                    numeros[mult].verificado = true;
+                    numeros[mult].primo = false;
+                    numeros[mult].element.className = 'excluido';
+                    mult = mult + i;
+                }
+            }
+            
+            //Funcao para escrever os primos na tabela de resultado
+            function escrevePrimos(){
+                var tabela = document.getElementById('tabelaPrimos');
+                tabela.innerHTML = '';
+                var i = 1;
+                var cont = 0;
+                var linha = document.createElement('tr');
+                while(i < numeros.length){
+                    if(cont == 5){
+                        cont = 0;
+                        tabela.appendChild(linha); 
+                        var linha = document.createElement('tr');
+                    }  
+                    
+                    if(numeros[i].primo){
+                        console.log(i)
+                        var celula = document.createElement('td');
+                        celula.innerHTML = numeros[i].valor;
+                        linha.appendChild(celula);
+                        cont++;
+                    }
+                    i++;
+                }
+                tabela.appendChild(linha);     
+                document.getElementById('msgInfo').innerHTML = 'ok.';
+            }
+        </script>
+    </head>
+    <body style="font: 15px verdana; text-align: center; background-color: ">
+        <span style="font-size: 17px;">O crivo de Eratóstenes verifica os números primos dentro de uma faixa de números de 1 até x</span>
+        <br>
+        <br>
+        <br>
+        <label>Digite o valor de x: </label>
+        <input type="text" id="valorX" value="30"/>
+        <button onclick="validaCrivo();">Calcular</button>
+        <br>
+        <label style="color: red; font-size: 11px;" id="msgErro"></label>
+        <br>
+        <label style="color: green; font-size: 11px;" id="msgInfo"></label>
+        
+        <br>
+        <div style="text-align: left; float:left;">
+            <label style="font-size: 17px; text-align: left;">Tabela Calculada</label>
+            <br>
+            <table id="tabelaNumeros"></table> 
+        </div>
+        <div style="text-align: left;  float:left; margin-left: 100px;">
+            <label style="font-size: 17px;">Tabela de Primos</label>
+            <br>
+            <table id="tabelaPrimos" style="font-size: 13px;"></table> 
+        </div>
+    </body>    
+</html>
